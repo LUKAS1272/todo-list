@@ -23,7 +23,7 @@ const getRequestObject = (method: string, body: object) => {
     } else {
         return {
             method: method,
-            headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' },
         };
     }
 }
@@ -38,12 +38,16 @@ export const createTask = (name: string, due_date: Date) => {
     fetchDB("tasks", "post", data);
 }
 
+export const deleteTask = (id: string) => {
+    fetchDB(`tasks/${id}`, "delete");
+}
+
 export const getTasks = (searchArgs: string = "") => {
     return fetchDB(`tasks${searchArgs}`, "get");
 }
 
-export const toggleCompletedTask = (id: string) => {
-    getTasks(`/${id}`)
+export const toggleCompletedTask = async (id: string) => {
+    await getTasks(`/${id}`)
     .then((task: Task) => {
         if (task) {
             console.log(task);
