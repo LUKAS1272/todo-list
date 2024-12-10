@@ -11,46 +11,52 @@ type Task = {
 export default function Todo() {
     const [task, setTask] = useState<string>("");
     const [date, setDate] = useState<string>("");
+    const [filter, setFilter] = useState<string>("");
     const [tasks, setTasks] = useState<Task[]>([]);
 
     useEffect(() => {
+        if (filter) {
+            updateTasks();
+        }
         const fetchInitialTasks = async () => {
             try {
-                const fetchedTasks = await getTasks('?_sort=is_completed');
+                const fetchedTasks = await getTasks('', true, filter);
                 setTasks(fetchedTasks || []); 
             } catch (error) {
                 console.error("Error fetching tasks:", error);
             }
         };
         fetchInitialTasks();
-    }, []);
+    }, [filter]);
+
+    const updateTasks = async () => {
+        const updatedTasks = await getTasks('', true, filter);
+        setTasks(updatedTasks);
+    };
 
     const handleAddTask = async () => {
         if (task) {
             await createTask(task, new Date(date));
             setTask("");
             setDate("");
-            const updatedTasks = await getTasks('?_sort=is_completed');
-            setTasks(updatedTasks);
+            updateTasks();
         }
     };
 
     const handleRemoveTask = async (id: string) => {
         await deleteTask(id);
-        const updatedTasks = await getTasks('?_sort=is_completed');
-        setTasks(updatedTasks);
+        updateTasks();
     };
 
     const handleToggleComplete = async (id: string) => {
         await toggleCompletedTask(id);
-        const updatedTasks = await getTasks('?_sort=is_completed');
-        setTasks(updatedTasks);
+        updateTasks();
     };
 
     return (
         <div className={'mt-10 w-1/2 m-auto'}>
             <h1 className={'text-4xl font-black text-center'}>ToDo List</h1>
-            <div className={'flex flex-col justify-start items-start my-5 mb-10'}>
+            <div className={'flex flex-col justify-start items-start mt-5'}>
                 <form className={'w-full'}>
                     <label htmlFor="">Task name</label>
                     <input
@@ -74,63 +80,82 @@ export default function Todo() {
                         Add Task
                     </button>
                 </form>
-                <h3 className="mt-5 text-lg">Filtrování</h3>
-<div className="flex flex-col items-start">
-  <div className="flex items-center space-x-2">
-    <input
-      type="radio"
-      name="radioBtn"
-      id="all"
-      className="form-radio"
-    />
-    <label htmlFor="all" className="text-gray-700">
-      Vše
-    </label>
-  </div>
-  <div className="flex items-center space-x-2">
-    <input
-      type="radio"
-      name="radioBtn"
-      id="completed"
-      className="form-radio"
-    />
-    <label htmlFor="completed" className="text-gray-700">
-      Dokončené
-    </label>
-  </div>
-  <div className="flex items-center space-x-2">
-    <input
-      type="radio"
-      name="radioBtn"
-      id="incomplete"
-      className="form-radio"
-    />
-    <label htmlFor="incomplete" className="text-gray-700 ml-1">
-      Nedokončené
-    </label>
-  </div>
-</div>
 
-  
+                <h3 className="mt-5 font-medium">Filter</h3>
+                <div className="flex flex-col items-start">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="radioBtn"
+                      id="all"
+                      value=""
+                      className="form-radio"
+                      onChange={(e) => setFilter(e.target.value)}
+                      defaultChecked
+                    />
+                    <label htmlFor="all" className="text-gray-700">
+                      Vše
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="radioBtn"
+                      id="completed"
+                      value="1"
+                      onChange={(e) => setFilter(e.target.value)}
+                      className="form-radio"
+                    />
+                    <label htmlFor="completed" className="text-gray-700">
+                      Dokončené
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="radioBtn"
+                      id="incomplete"
+                      value="0"
+                      onChange={(e) => setFilter(e.target.value)}
+                      className="form-radio"
+                    />
+                    <label htmlFor="incomplete" className="text-gray-700 ml-1">
+                      Nedokončené
+                    </label>
+                  </div>
+                </div>
             </div>
-            <ul>
-                {Array.isArray(tasks) &&
-                    tasks.map((task) => (
+
+            <hr className='my-5' />
+
+            <h2 className='font-semibold text-2xl mb-1'>Tasks</h2>
+            {tasks.length === 0 ? (
+                <>
+                    <p>No task available</p>
+                    {filter !== '' ? (
+                        <p>Try changing the filters</p>
+                    ) : (
+                        <p>Try adding one</p>
+                    )}
+                </>
+            ) : (
+                <ul>
+                    {tasks.map((task) => (
                         <li key={task.id} className={'flex justify-between items-end mb-2'}>
                             <div className={`flex flex-col ${task.is_completed ? 'line-through opacity-50' : ''}`}>
-                                <span className={'text-xl font-semibold mr-0.5'}>
-                                    {task.name}
-                                </span>
+                            <span className={'text-xl font-medium mr-0.5'}>
+                                {task.name}
+                            </span>
                                 <span className={'text-xs mr-3'}>
-                                    {new Intl.DateTimeFormat('en-US', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })
-                                        .format(new Date(task.due_date))}
-                                </span>
+                                {new Intl.DateTimeFormat('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })
+                                    .format(new Date(task.due_date))}
+                            </span>
                             </div>
 
                             <div>
@@ -146,7 +171,8 @@ export default function Todo() {
                             </div>
                         </li>
                     ))}
-            </ul>
+                </ul>
+            )}
         </div>
     );
 }
