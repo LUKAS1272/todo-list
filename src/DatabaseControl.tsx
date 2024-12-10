@@ -2,7 +2,7 @@ type Task = {
     id: string,
     name: string,
     due_date: Date,
-    is_completed: boolean
+    is_completed: number
 }
 
 
@@ -32,7 +32,7 @@ export const createTask = (name: string, due_date: Date) => {
     const data = {
         "name": name,
         "due_date": due_date,
-        "is_completed": false,
+        "is_completed": 0,
     }
 
     fetchDB("tasks", "post", data);
@@ -50,8 +50,7 @@ export const toggleCompletedTask = async (id: string) => {
     await getTasks(`/${id}`)
     .then((task: Task) => {
         if (task) {
-            console.log(task);
-            task.is_completed = !task.is_completed;
+            task.is_completed = task.is_completed === 0 ? 1 : 0;
             fetchDB(`tasks/${id}`, "put", task);
         }
     });
