@@ -5,7 +5,7 @@ type Task = {
     id: string;
     name: string;
     due_date: string; 
-    is_completed: boolean;
+    is_completed: number;
 };
 
 export default function Todo() {
@@ -16,7 +16,7 @@ export default function Todo() {
     useEffect(() => {
         const fetchInitialTasks = async () => {
             try {
-                const fetchedTasks = await getTasks();
+                const fetchedTasks = await getTasks('?_sort=is_completed');
                 setTasks(fetchedTasks || []); 
             } catch (error) {
                 console.error("Error fetching tasks:", error);
@@ -27,28 +27,23 @@ export default function Todo() {
 
     const handleAddTask = async () => {
         if (task) {
-            const newTask = {
-                name: task,
-                due_date: date,
-                is_completed: false,
-            };
-            await createTask(newTask.name, new Date(newTask.due_date));
+            await createTask(task, new Date(date));
             setTask("");
             setDate("");
-            const updatedTasks = await getTasks();
+            const updatedTasks = await getTasks('?_sort=is_completed');
             setTasks(updatedTasks);
         }
     };
 
     const handleRemoveTask = async (id: string) => {
         await deleteTask(id);
-        const updatedTasks = await getTasks();
+        const updatedTasks = await getTasks('?_sort=is_completed');
         setTasks(updatedTasks);
     };
 
     const handleToggleComplete = async (id: string) => {
         await toggleCompletedTask(id);
-        const updatedTasks = await getTasks();
+        const updatedTasks = await getTasks('?_sort=is_completed');
         setTasks(updatedTasks);
     };
 
@@ -102,7 +97,7 @@ export default function Todo() {
 
                             <div>
                                 <button onClick={() => handleToggleComplete(task.id)}
-                                        className={`font-bold text-white px-5 py-2 rounded-md mr-1 ${task.is_completed ? 'bg-gray-400' : 'bg-green-700'}`}>
+                                        className={`font-bold text-white px-5 py-2 rounded-md mr-1 ${task.is_completed === 1 ? 'bg-gray-400' : 'bg-green-700'}`}>
                                     {task.is_completed ? 'Uncomplete' : 'Complete'}
                                 </button>
 
