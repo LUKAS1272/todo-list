@@ -79,6 +79,44 @@ export default function Todo() {
                         Add Task
                     </button>
                 </form>
+                <h3 className="mt-5 text-lg">Filtrování</h3>
+<div className="flex flex-col items-start">
+  <div className="flex items-center space-x-2">
+    <input
+      type="radio"
+      name="radioBtn"
+      id="all"
+      className="form-radio"
+    />
+    <label htmlFor="all" className="text-gray-700">
+      Vše
+    </label>
+  </div>
+  <div className="flex items-center space-x-2">
+    <input
+      type="radio"
+      name="radioBtn"
+      id="completed"
+      className="form-radio"
+    />
+    <label htmlFor="completed" className="text-gray-700">
+      Dokončené
+    </label>
+  </div>
+  <div className="flex items-center space-x-2">
+    <input
+      type="radio"
+      name="radioBtn"
+      id="incomplete"
+      className="form-radio"
+    />
+    <label htmlFor="incomplete" className="text-gray-700 ml-1">
+      Nedokončené
+    </label>
+  </div>
+</div>
+
+  
             </div>
             <ul>
                 {Array.isArray(tasks) &&
