@@ -42,8 +42,15 @@ export const deleteTask = (id: string) => {
     fetchDB(`tasks/${id}`, "delete");
 }
 
-export const getTasks = (searchArgs: string = "") => {
-    return fetchDB(`tasks${searchArgs}`, "get");
+export const getTasks = (slug: string = "", sorted: boolean = false, filter: string = '') => {
+    const fetchParams = [];
+
+    if (sorted) { fetchParams.push('_sort=is_completed'); }
+    if (filter !== '') { fetchParams.push(`is_completed=${filter}`); }
+
+    const queryString = fetchParams.length > 0 ? `?${fetchParams.join('&')}` : '';
+    return fetchDB(`tasks${slug}${queryString}`, "get");
+
 }
 
 export const toggleCompletedTask = async (id: string) => {
